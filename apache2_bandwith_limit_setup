@@ -1,0 +1,26 @@
+1. Enable mod_ratelimit module: sudo a2enmod ratelimit
+
+2. Restart Apache: sudo systemctl restart apache2
+
+3. Adjust the configuration: /etc/apache2/apache2.conf
+
+<Directory /var/www/html>
+#<Directory /var/www/html/example>
+    SetOutputFilter RATE_LIMIT
+    <IfModule mod_ratelimit.c>
+        # Limit bandwidth to 40 MB/s (40000 KB/s)
+        <IfModule mod_setenvif.c>
+            SetEnvIf Request_URI ".*" rate-limit
+            SetEnvIf rate-limit ^$ fixthisvariable=1
+            SetEnvIf fixthisvariable ".*" rate-limit=40000
+        </IfModule>
+        <IfModule mod_headers.c>
+            Header append Vary User-Agent env=!dont-vary
+        </IfModule>
+    </IfModule>
+</Directory>
+
+
+4. After updating the configuration, run the syntax check: sudo apachectl configtest
+
+5. Restart Apache: sudo systemctl restart apache2
